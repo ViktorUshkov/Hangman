@@ -14,7 +14,7 @@ class HangTheMan:
         """
         self.screen = hangman.screen
         self.screen_rect = hangman.screen.get_rect()
-        self.settings = hangman.settings
+        #self.settings = hangman.settings
         # ассеты для виселицы
         self.assets = self._load_assets()
         self.rect = None

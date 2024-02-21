@@ -3,6 +3,7 @@ import pygame
 import random
 from settings import Settings
 from hangtheman import HangTheMan
+from button import ButtonsSet
 
 class Hangman:
     """
@@ -25,9 +26,12 @@ class Hangman:
                                                  (self.settings.screen_width, self.settings.screen_height))
         # загаданное слово
         self.mystery_word = None
+        # строка для отслеживания отгадывания mystery_word
+        self.guessing_word = None
         # количество ошибок при угадывании
         self.faults = 0
         self.hangtheman = HangTheMan(self)
+        self.buttons = ButtonsSet(self)
 
     def run_game(self) -> None:
         """
@@ -63,6 +67,7 @@ class Hangman:
         """
         self.screen.blit(self.background, (0, 0))
         self.hangtheman.blitme(self)
+        self.buttons.blit_buttons(self)
         pygame.display.flip()
 
     def _get_word(self) -> str:
