@@ -67,7 +67,7 @@ class Hangman:
         """
         self.screen.blit(self.background, (0, 0))
         self.hangtheman.blitme(self)
-        self.buttons.blit_buttons(self)
+        self.buttons.blit_buttons()
         pygame.display.flip()
 
     def _get_word(self) -> str:
