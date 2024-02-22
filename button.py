@@ -24,7 +24,6 @@ class Button:
     START_CHAR = ord('a')
 
     # координаты центра первой буквы
-    #TODO: рассчитать нормально
     START_CENTER_X = 43
     START_CENTER_Y = Settings.SCREEN_HEIGHT * (2 / 3) + 50
 

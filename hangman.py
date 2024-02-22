@@ -11,6 +11,8 @@ class Hangman:
     """
     # файл со словами для игры
     FILE_WITH_WORDS = "words.txt"
+    # максимально возможное количество ошибок
+    MAX_FAULTS = 6
     def __init__(self):
         """
         Инициализация класса игры, установка настроек
@@ -25,13 +27,17 @@ class Hangman:
         self.background = pygame.transform.scale(self.background,
                                                  (self.settings.screen_width, self.settings.screen_height))
         # загаданное слово
-        self.mystery_word = None
+        self.mystery_word: str = self._get_word()
         # строка для отслеживания отгадывания mystery_word
-        self.guessing_word = None
-        # количество ошибок при угадывании
-        self.faults = 0
-        self.hangtheman = HangTheMan(self)
-        self.buttons = ButtonsSet(self)
+        self.guessing_word: str = "_" * len(self.mystery_word)
+        # шрифт для отображения угадываемого слова
+        self.guessing_font = pygame.font.Font(None, 48)
+        # количество совершенных ошибок при угадывании
+        self.faults: int = 0
+        # класс виселицы
+        self.hangtheman: HangTheMan = HangTheMan(self)
+        # класс кнопок
+        self.buttons_set: ButtonsSet = ButtonsSet(self)
 
     def run_game(self) -> None:
         """
@@ -52,22 +58,43 @@ class Hangman:
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
-                self._check_play_button_click(mouse_position)
+                self._check_mouse_button_click(mouse_position)
 
-    def _check_play_button_click(self, mouse_position) -> None:
+    def _check_mouse_button_click(self, mouse_position) -> None:
         """
         Обработка кликов мыши
         :param mouse_position: позиция, в которой произошел клик
         """
-        pass
+        if self.settings.playing:
+            # выбранная буква
+            chosen_letter: str = ""
+
+            for button in self.buttons_set.buttons:
+                if button.rect.collidepoint(mouse_position) and button.active:
+                    chosen_letter = button.char
+                    button.active = False
+                    break
+
+            if chosen_letter:
+                if self._is_guess_right(chosen_letter):
+                    self._reveal_letter(chosen_letter)
+                else:
+                    self.faults += 1
+        else:
+            ...
+
 
     def _update_window(self) -> None:
         """
         Отрисовка окна приложения
         """
-        self.screen.blit(self.background, (0, 0))
-        self.hangtheman.blitme(self)
-        self.buttons.blit_buttons()
+        if self.settings.playing:
+            self.screen.blit(self.background, (0, 0))
+            self.hangtheman.blitme(self)
+            self.buttons_set.blit_buttons()
+            self._blit_guessing_word()
+        else:
+            ...
         pygame.display.flip()
 
     def _get_word(self) -> str:
@@ -79,9 +106,45 @@ class Hangman:
             all_words: list[str] = file.readlines()
         return all_words[random.randrange(0, len(all_words) - 1)].rstrip()
 
+    def _initiate_words(self) -> None:
+        """
+        Выставляет значения для загаданного слова и строки для его отгадывания
+        """
+        self.mystery_word = self.mystery_word = self._get_word()
+        self.guessing_word = "_" * len(self.mystery_word)
+
     def _is_guess_right(self, letter: str) -> bool:
         """
         Проверяет, есть ли выбранная буква в слове
         :return: True, если буква в слове; False в ином случае
         """
         return letter in self.mystery_word
+
+    def _reveal_letter(self, guessed_letter: str) -> None:
+        """
+        Открывает верно угаданную букву (или буквы, если буква несколько раз встречается в слове) в guessing_word
+        :param guessed_letter: угаданная буква
+        """
+        mystery_word_list: list[str] = list(self.mystery_word)
+        guessing_word_list: list[str] = list(self.guessing_word)
+        indexes_of_letter: list[int] = [idx for idx, let in enumerate(mystery_word_list) if let == guessed_letter]
+        for idx in indexes_of_letter:
+            guessing_word_list[idx] = guessed_letter
+        self.guessing_word = ''.join(guessing_word_list)
+
+    def _blit_guessing_word(self) -> None:
+        """
+        Отрисовка угадываемого слова
+        """
+        ...
+
+    def _reset(self) -> None:
+        """
+        Перезапуск игры
+        """
+        self.settings.playing = True
+        self._initiate_words()
+        self.faults = 0
+        for button in self.buttons_set.buttons:
+            if not button.active:
+                button.active = True

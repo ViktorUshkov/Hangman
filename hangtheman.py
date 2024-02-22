@@ -14,7 +14,6 @@ class HangTheMan:
         """
         self.screen = hangman.screen
         self.screen_rect = hangman.screen.get_rect()
-        #self.settings = hangman.settings
         # ассеты для виселицы
         self.assets = self._load_assets()
         self.rect = None
@@ -26,7 +25,7 @@ class HangTheMan:
         """
         hang_stage = self.assets[hangman.faults]
         self.rect = hang_stage.get_rect()
-        self.rect.center = self.screen_rect.center
+        self.rect.midtop = (self.screen_rect.midtop[0], self.screen_rect.midtop[1] + 100)
         self.screen.blit(hang_stage, self.rect)
 
     def _load_assets(self) -> list[pygame.Surface]:
@@ -37,6 +36,7 @@ class HangTheMan:
         assets = []
         for asset_name in sorted(os.listdir(self.HANGMAN_ASSETS_PATH)):
             asset = pygame.image.load(self.HANGMAN_ASSETS_PATH + asset_name).convert()
+            asset.set_colorkey((255, 255, 255))
             assets.append(asset)
         return assets
 

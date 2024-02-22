@@ -13,3 +13,5 @@ class Settings:
         """
         self.screen_width = self.SCREEN_WIDTH
         self.screen_height = self.SCREEN_HEIGHT
+        # показывает, идёт ли в данный момент игра
+        self.playing = True
