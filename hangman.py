@@ -13,7 +13,8 @@ class Hangman:
     FILE_WITH_WORDS = "words.txt"
     # максимально возможное количество ошибок
     MAX_FAULTS = 6
-    # цвет для текста
+    # цвета
+    WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     def __init__(self):
         """
@@ -34,8 +35,12 @@ class Hangman:
         self.guessing_word: str = "_" * len(self.mystery_word)
         # шрифт для отображения угадываемого слова
         self.guessing_font = pygame.font.Font(None, 72)
+        # шрифт для итогового сообщения
+        self.message_font = pygame.font.Font(None, 40)
         # количество совершенных ошибок при угадывании
         self.faults: int = 0
+        # исход последней игры
+        self.result: str = ""
         # класс виселицы
         self.hangtheman: HangTheMan = HangTheMan(self)
         # класс кнопок
@@ -47,6 +52,10 @@ class Hangman:
         """
         while True:
             self._check_events()
+            status, result = self._is_game_finished()
+            if status:
+                self.settings.playing = False
+                self.result = result
             self._update_window()
             self.clock.tick(60)
 
@@ -96,7 +105,8 @@ class Hangman:
             self.buttons_set.blit_buttons()
             self._blit_guessing_word()
         else:
-            ...
+            self.screen.fill(self.BLACK, self.screen.get_rect())
+            self._write_message(self.result)
         pygame.display.flip()
 
     def _get_word(self) -> str:
@@ -138,7 +148,7 @@ class Hangman:
         """
         Отрисовка угадываемого слова
         """
-        word_img: pygame.Surface = self.guessing_font.render(self.guessing_word, True, self.BLACK)
+        word_img: pygame.Surface = self.guessing_font.render(self.guessing_word, True, self.WHITE)
         word_img_rect: pygame.Rect = word_img.get_rect()
         word_width: int = word_img_rect.width
         self.screen.blit(word_img, (self.settings.screen_width / 2 - word_width / 2, 400))
@@ -155,7 +165,32 @@ class Hangman:
         else:
             return False, ""
 
+    def _write_message(self, result: str) -> None:
+        """
+        Выводит сообщение по окончании игры
+        :param result: исход игры (win или lose)
+        """
+        win_message: str = f"Вы победили! Было загадано слово {self.mystery_word}"
+        lose_message: str = f"Увы, неудача :( Было загадано слово {self.mystery_word}"
+        to_next_game_msg: str = "Нажмите ЛКМ, чтобы начать новую игру"
+        if result == "win":
+            win_message_img: pygame.Surface = self.message_font.render(win_message, True, self.WHITE)
+            win_message_img_rect: pygame.Rect = win_message_img.get_rect()
+            win_message_img_rect.midbottom = self.screen.get_rect().center
+            self.screen.blit(win_message_img, win_message_img_rect)
+        else:
+            lose_message_img: pygame.Surface = self.message_font.render(lose_message, True, self.WHITE)
+            lose_message_img_rect: pygame.Rect = lose_message_img.get_rect()
+            lose_message_img_rect.midbottom = self.screen.get_rect().center
+            self.screen.blit(lose_message_img, lose_message_img_rect)
+
+        to_next_game_msg_img: pygame.Surface = self.message_font.render(to_next_game_msg, True, self.WHITE)
+        to_next_game_msg_img_rect: pygame.Rect = to_next_game_msg_img.get_rect()
+        to_next_game_msg_img_rect.midtop = self.screen.get_rect().center
+        self.screen.blit(to_next_game_msg_img, to_next_game_msg_img_rect)
+
     def _reset(self) -> None:
+
         """
         Перезапуск игры
         """
