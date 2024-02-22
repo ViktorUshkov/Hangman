@@ -13,6 +13,8 @@ class Hangman:
     FILE_WITH_WORDS = "words.txt"
     # максимально возможное количество ошибок
     MAX_FAULTS = 6
+    # цвет для текста
+    BLACK = (0, 0, 0)
     def __init__(self):
         """
         Инициализация класса игры, установка настроек
@@ -23,15 +25,15 @@ class Hangman:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption('Hangman')
-        self.background = pygame.image.load('assets/background.jpg')
-        self.background = pygame.transform.scale(self.background,
-                                                 (self.settings.screen_width, self.settings.screen_height))
+        self.game_background = pygame.image.load('assets/background.jpg')
+        self.game_background = pygame.transform.scale(self.game_background,
+                                                      (self.settings.screen_width, self.settings.screen_height))
         # загаданное слово
         self.mystery_word: str = self._get_word()
         # строка для отслеживания отгадывания mystery_word
         self.guessing_word: str = "_" * len(self.mystery_word)
         # шрифт для отображения угадываемого слова
-        self.guessing_font = pygame.font.Font(None, 48)
+        self.guessing_font = pygame.font.Font(None, 72)
         # количество совершенных ошибок при угадывании
         self.faults: int = 0
         # класс виселицы
@@ -81,7 +83,7 @@ class Hangman:
                 else:
                     self.faults += 1
         else:
-            ...
+            self._reset()
 
 
     def _update_window(self) -> None:
@@ -89,7 +91,7 @@ class Hangman:
         Отрисовка окна приложения
         """
         if self.settings.playing:
-            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.game_background, (0, 0))
             self.hangtheman.blitme(self)
             self.buttons_set.blit_buttons()
             self._blit_guessing_word()
@@ -136,7 +138,22 @@ class Hangman:
         """
         Отрисовка угадываемого слова
         """
-        ...
+        word_img: pygame.Surface = self.guessing_font.render(self.guessing_word, True, self.BLACK)
+        word_img_rect: pygame.Rect = word_img.get_rect()
+        word_width: int = word_img_rect.width
+        self.screen.blit(word_img, (self.settings.screen_width / 2 - word_width / 2, 400))
+
+    def _is_game_finished(self) -> tuple[bool, str]:
+        """
+        Проверяет, закончена ли игра
+        :return: (True, "исход"), если игра выиграна или проиграна, (False, "") в ином случае
+        """
+        if self.mystery_word == self.guessing_word:
+            return True, "win"
+        elif self.faults == self.MAX_FAULTS:
+            return True, "lose"
+        else:
+            return False, ""
 
     def _reset(self) -> None:
         """
