@@ -16,6 +16,9 @@ class Hangman:
     # цвета
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
+
+    # левая кнопка мыши
+    LEFT = 1
     def __init__(self):
         """
         Инициализация класса игры, установка настроек
@@ -68,8 +71,9 @@ class Hangman:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_position = pygame.mouse.get_pos()
-                self._check_mouse_button_click(mouse_position)
+                if event.button == self.LEFT:
+                    mouse_position = pygame.mouse.get_pos()
+                    self._check_mouse_button_click(mouse_position)
 
     def _check_mouse_button_click(self, mouse_position) -> None:
         """
